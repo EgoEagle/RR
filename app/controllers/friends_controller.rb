@@ -1,17 +1,20 @@
 class FriendsController < ApplicationController
   before_action :set_friend, only: %i[ show edit update destroy ]
   #if user is not authenticated
-  before_action :authenticate_user!, except: [:index, :show] 
+  before_action :authenticate_user!, except: [:index, :show]
   #can only do it if correct user for pages edit/update/destroy
   before_action :correct_user, only: [:edit, :update, :destroy]
   # GET /friends or /friends.json
   def index
     @friends = Friend.all
+    @user = current_user
     respond_to do |format|
       format.html
-      format.pdf do 
-        pdf = CertificatePDF.new(@friends)
-        send_data pdf.render, file: 'test.pdf', type:'application/pdf', disposition: "inline"
+      format.pdf do
+        pdf = CertificatePDF.new(@friends, @user)
+        
+
+        send_data pdf.render, file: "test.pdf", type: "application/pdf", disposition: "inline"
       end
     end
   end
@@ -73,15 +76,15 @@ class FriendsController < ApplicationController
     redirect_to friends_path, notice: "Not Authorized" if @friend.nil?
   end
 
-
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_friend
-      @friend = Friend.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def friend_params
-      params.require(:friend).permit(:first_name, :last_name, :email, :phone, :twitter, :user_id)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_friend
+    @friend = Friend.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def friend_params
+    params.require(:friend).permit(:first_name, :last_name, :email, :phone, :twitter, :user_id)
+  end
 end
